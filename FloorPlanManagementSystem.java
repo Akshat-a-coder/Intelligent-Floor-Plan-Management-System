@@ -4,9 +4,10 @@ import java.util.Date;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
+
 enum Roles {
     ADMIN,
-    EMPLOYEE
+    USER
 }
 
 class FloorPlanManagement{
@@ -29,7 +30,6 @@ class FloorPlanManagement{
     }
 
 
-    // This method checks for password
    public boolean checkPassword(final String enteredPassword) {
         final String enteredPasswordHash = encryptPass(enteredPassword);
         return enteredPasswordHash.equals(hashedPassword);
@@ -56,19 +56,19 @@ public class FloorPlanManagementSystem {
     public static void main(String[] args) {
         FloorPlanManagement user = authenticateUser();
         if (user != null) {
-            FloorPlan localPlan = getFloorPlans("local plan");
-            FloorPlan serverPlan = getFloorPlans("server plan");
+            FloorPlan localPlan = getFloorPlans("local plan" , user);
+            FloorPlan serverPlan = getFloorPlans("server plan" , user);
             ConflictResolver conflictResolver = new ConflictResolver();
             conflictResolver.resolveConflict(localPlan, serverPlan, user);
         } else {
-            System.out.println("Authentication failed. Exiting...");
+            printNeg("Authentication failed. Exiting...");
             return ;
         }
     }
 
-    private  static FloorPlan getFloorPlans(String s){
+    private  static FloorPlan getFloorPlans(String s , FloorPlanManagement user){
         Scanner scanner = new Scanner(System.in);
-        System.out.println("Upload the " + s);
+        printPos("Upload the " + s);
 
         System.out.print("Enter the floor plan name: ");
         String planName = scanner.nextLine();
@@ -85,7 +85,7 @@ public class FloorPlanManagementSystem {
     
         ArrayList<MeetingRoom> meetingRooms = new ArrayList<>();
         for (int i = 1; i <= numRooms; i++) {
-            System.out.println("Enter details for Room " + i + ":");
+            printPos("Enter details for Room " + i);
             int floor = getIntInput(scanner, "Floor: ");
             int roomNo = getIntInput(scanner, "RoomNumber: ");
             int capacity = getIntInput(scanner, "Capacity: ");
@@ -93,8 +93,6 @@ public class FloorPlanManagementSystem {
             meetingRooms.add(new MeetingRoom(roomNo ,capacity, floor));
         }
         
-        FloorPlanManagement admin = new FloorPlanManagement("admin", "admin_password", Roles.ADMIN);
-
         return new FloorPlan(
             1,                  
             planName,     
@@ -102,7 +100,7 @@ public class FloorPlanManagementSystem {
             new Date(),         
             meetingRooms,      
             new Date(),         
-            admin,
+            user,
             priority
         );
     }
@@ -114,7 +112,7 @@ public class FloorPlanManagementSystem {
                 return scanner.nextInt();
             } catch (InputMismatchException e) {
                 System.out.print("Invalid input. Please enter an integer: ");
-                scanner.nextLine(); // Consume the invalid input
+                scanner.nextLine(); 
             }
         }
     }
@@ -126,7 +124,7 @@ public class FloorPlanManagementSystem {
                 return scanner.nextInt();
             } catch (InputMismatchException e) {
                 System.out.print("Invalid input. Please enter an integer: ");
-                scanner.nextLine(); // Consume the invalid input
+                scanner.nextLine(); 
             }
         }
     }
@@ -135,32 +133,45 @@ public class FloorPlanManagementSystem {
         // Define authorized users
         ArrayList<FloorPlanManagement> authorizedUsers = new ArrayList<>();
         authorizedUsers.add(new FloorPlanManagement("admin", "admin_password", Roles.ADMIN));
-        authorizedUsers.add(new FloorPlanManagement("employee", "employee_password", Roles.EMPLOYEE));
+        authorizedUsers.add(new FloorPlanManagement("user", "user_password", Roles.USER));
     
         Scanner scanner = new Scanner(System.in);
         System.out.print("Enter username: ");
         String username = scanner.nextLine();
         System.out.print("Enter password: ");
         String password = scanner.nextLine();
-        System.out.print("Enter role (ADMIN/EMPLOYEE): ");
+        System.out.print("Enter role (ADMIN/USER): ");
         String roleStr = scanner.nextLine().toUpperCase();
         Roles role;
         try {
         role = Roles.valueOf(roleStr);
     } catch (IllegalArgumentException e) {
-        System.out.println("Invalid role. Please enter either ADMIN or EMPLOYEE.");
+        printNeg("Invalid role. Please enter either ADMIN or USER.");
         return null;
     }
         for (FloorPlanManagement user : authorizedUsers) {
             if (user.getUsername().equals(username) && user.checkPassword(password)) {
-                System.out.println("Authentication successful.");
+                printPos("Authentication successful.");
                 return user;
             }
         }
-        System.out.println("Authentication failed. Invalid username or password.");
+        printNeg("Authentication failed. Invalid username or password.");
         return null;
     }
 
+    public static void printPos(String s){
+        String greenColor = "\u001B[32m";
+        String boldStyle = "\u001B[1m";
+        String resetColorAndStyle = "\u001B[0m";
+        System.out.println(greenColor + boldStyle + s + resetColorAndStyle);
+    }
+
+    public static void printNeg(String s){
+        String redColor = "\u001B[31m";
+        String boldStyle = "\u001B[1m";
+        String resetColorAndStyle = "\u001B[0m";
+        System.out.println(redColor + boldStyle + s + resetColorAndStyle);
+    }
 }
 
 

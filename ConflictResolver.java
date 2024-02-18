@@ -5,7 +5,7 @@ public class ConflictResolver {
     public void resolveConflict(final FloorPlan localPlan, final FloorPlan serverPlan, final FloorPlanManagement admin) {
         // if user is admin then admin changes will be valid
         if (admin != null && admin.checkPassword("admin_password") && admin.getRole() == Roles.ADMIN) {
-            System.out.println("Admin resolving conflict. Admin's version takes priority.");
+            FloorPlanManagementSystem.printPos("Admin resolving conflict. Admin's version takes priority.");
             serverPlan.uploadPlan();
         } 
         else {
@@ -13,11 +13,11 @@ public class ConflictResolver {
             int priorityDifference = Integer.compare(localPlan.getPriority(), serverPlan.getPriority());
 
             if (priorityDifference > 0) {
-                System.out.println("Conflict resolved!!. Uploading local version based on priority...");
+                FloorPlanManagementSystem.printPos("Conflict resolved!!. Uploading local version based on priority...");
                 localPlan.uploadPlan();
             } 
             else if (priorityDifference < 0) {
-                System.out.println("Conflict resolved!!. Merging server version based on priority...");
+                FloorPlanManagementSystem.printPos("Conflict resolved!!. Merging server version based on priority...");
                 serverPlan.uploadPlan();
             } 
             else {
@@ -25,15 +25,15 @@ public class ConflictResolver {
                 int timeStampDiff = localPlan.getLastModified().compareTo(serverPlan.getLastModified());
     
                 if (timeStampDiff > 0) {
-                    System.out.println("Conflict resolved!!. Uploading local version based on timestamp...");
+                    FloorPlanManagementSystem.printPos("Conflict resolved!!. Uploading local version based on timestamp...");
                     localPlan.uploadPlan();
                 } 
                 else if (timeStampDiff < 0) {
-                    System.out.println("Conflict resolved!!. Merging server version based on timestamp...");
+                    FloorPlanManagementSystem.printPos("Conflict resolved!!. Merging server version based on timestamp...");
                     serverPlan.uploadPlan();
                 } 
                 else {
-                    System.out.println("Conflict Occurred.");
+                    FloorPlanManagementSystem.printNeg("Conflict Occurred.");
                     throw new IllegalStateException("Conflict Occurred.");
                 }
             }
