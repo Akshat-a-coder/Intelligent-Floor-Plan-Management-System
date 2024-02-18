@@ -1,4 +1,3 @@
-import java.util.ArrayList;
 
 public class ConflictResolver {
     // This method do conflict resolution based on priority, timestamp, or user roles
